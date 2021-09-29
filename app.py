@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 import os
 
@@ -10,8 +11,11 @@ import os
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] ='catalog123'
+
+# configure sql
 app.config['SQLALCHEMY_DATABASE_URI']= 'postgresql+psycopg2://moringa:muruthi1995@localhost/catalog'
 app.config["DEBUG"] = True
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 api = Api(app)
 db = SQLAlchemy(app)
@@ -36,7 +40,6 @@ class User(db.Model):
     public_id=db.Column(db.String(255), unique=True)
     email = db.Column(db.String(255))
     password = db.Column(db.String(255))
-    admin=db.Column(db.Boolean)
 
     @property
     def jsfrmt(self):
@@ -46,7 +49,10 @@ class User(db.Model):
         return {
             'id' : self.id,
             'name': self.name,
-            'public_id': 
+            'public_id': self.public_id,
+            'email': self.email,
+            'password': self.password,
+
         }
 
 
@@ -93,26 +99,65 @@ class Item(db.Model):
 ###########Routes####################
 
 @app.route('/user', methods=['GET'])
+def user():
+    users = User.query.all()
+
+    all_users =[]
+
+    for item in items:
+        name_list = {}
+        name_list.id = item['id']
+        name_list.name = item['name']
+        name_list.description = item['description']
+        name_list.imageurl = item['imageurl']
+        name_list.price = item['price']
+
+        all_users.append(name_list)
+
+    return jsonify({'items': all_users})
+
+@app.route('/user', method=['POST'])
+def create_user():
+    data = request.get_json()
+
+    passcode = generate_password_hash(data['password'], method='sha256')
+    new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password = passcode, admin=False)
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'message': 'New User successfully created'})
+
+@app.route('/items', methods=['GET'])
 def item():
     items = Item.query.all()
 
     all_items =[]
 
     for item in items:
-        id = item['id']
-        name = item['name']
+        item_list = {}
+        item_list.id = item['id']
+        item_list.name = item['name']
+        item_list.description = item['description']
+        item_list.imageurl = item['imageurl']
+        item_list.price = item['price']
+
+        all_items.append(item_list)
 
     return jsonify({'items': all_items})
 
 @app.route('/category', methods=['GET'])
-def item():
+def category():
     categories = Category.query.all()
 
     all_categories =[]
 
     for category in categories:
-        id = item['id']
-        name = item['name']
+        category_list = {}
+        category_list.id = category['id']
+        category_list.name = category['name']
+
+        all_categories.append(category_list)
 
 
     return jsonify({'categories': all_categories})
