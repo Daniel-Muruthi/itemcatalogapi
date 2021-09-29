@@ -5,17 +5,23 @@ from . import main
 from app.models import User, Category, Item
 from app import db
 
-@main.route('/signup', methods= ['POST', 'GET'])
+@main.route('/signup', methods= ['POST'])
 def create_user():
     data = request.get_json()
+    if data:
+        hashed_password = generate_password_hash(data['password'])
+        public_id=str(uuid.uuid4())
+        name=str(data['name'])
+        email=str(data['email'])
 
-    passcode = generate_password_hash(data['password'], method='sha256')
-    new_user = User(public_id=str(uuid.uuid4()),name=data['name'],  email=data['email'], password = passcode)
+        new_user = User(public_id=public_id,name=name,  email=email, password = hashed_password)
 
-    db.session.add(new_user)
-    db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-    return jsonify({'message': 'New User successfully created'})
+        return jsonify({'message': 'New User successfully created'})
+
+    return jsonify({'message': 'Data is empty'})
 
 @main.route('/items', methods=['GET'])
 def item():
@@ -26,7 +32,7 @@ def item():
     for item in items:
         item_list = {}
         item_list['id'] = item.id
-        item_list['name'] = item.name
+        item_list['product_name'] = item.product_name
         item_list['description'] = item.description
         item_list['imageurl'] = item.imageurl
         item_list['price'] = item.price
@@ -34,6 +40,22 @@ def item():
         all_items.append(item_list)
 
     return jsonify({'items': all_items})
+
+#get one item
+@main.route('/item/<product_name>', methods=['GET'])
+def get_one_item(product_name):
+    item = Item.query.filter_by(product_name=product_name).first()
+    
+    if not item:
+        return jsonify({'message': 'Your Item is out of stock!'})
+    item_list = {}
+    item_list['product_name'] = item.product_name
+    item_list['description'] = item.description
+    item_list['imageurl'] = item.imageurl
+    item_list['price'] = item.price
+    
+    
+    return jsonify({'item' : item_list })
 
 @main.route('/category', methods=['GET'])
 def category():
@@ -57,8 +79,7 @@ def all_categories():
 
     if not categories:
         return jsonify({'message': 'There are no categories!'})
-
-    db.session.add(categories)
+        
     db.session.commit()
 
     return jsonify({'message': 'No categories have been added'})

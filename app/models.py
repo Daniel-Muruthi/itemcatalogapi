@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
+
 #db model for item categories
 
 class Category(db.Model):
@@ -26,7 +27,7 @@ class Category(db.Model):
 class Item(db.Model):
     __tablename__ = 'items'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    product_name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     imageurl = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Integer, nullable=False)
