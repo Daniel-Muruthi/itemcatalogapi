@@ -99,4 +99,7 @@ def item():
     all_items =[]
 
     for item in items:
-        
+        if items:
+            id = item['id']
+            name = item['name']
+            description = item['description']
