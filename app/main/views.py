@@ -8,20 +8,35 @@ from app import db
 @main.route('/signup', methods= ['POST'])
 def create_user():
     data = request.get_json()
-    if data:
-        hashed_password = generate_password_hash(data['password'])
-        public_id=str(uuid.uuid4())
-        name=str(data['name'])
-        email=str(data['email'])
+    hashed_password = generate_password_hash(data['password'], method='sha256')
+    new_user=User(id = data['id'], public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password, email=data['email'])
+    db.session.add(new_user)
+    db.session.commit()
 
-        new_user = User(public_id=public_id,name=name,  email=email, password = hashed_password)
+    return jsonify({'message': 'New User successfully created'})
 
-        db.session.add(new_user)
-        db.session.commit()
 
-        return jsonify({'message': 'New User successfully created'})
+################List all users#################
 
-    return jsonify({'message': 'Data is empty'})
+@main.route('/listusers', methods=['GET'])
+def allusers():
+    users = User.query.all()
+
+    all_users =[]
+
+    for user in users:
+        name_list = {}
+        name_list['id'] = user.id
+        name_list['name'] = user.name
+        name_list['public_id'] = user.public_id
+        name_list['email'] = user.email
+        name_list['password'] = user.password
+
+        all_users.append(name_list)
+
+    return jsonify({'users': all_users})
+
+
 
 @main.route('/items', methods=['GET'])
 def item():
@@ -57,6 +72,15 @@ def get_one_item(product_name):
     
     return jsonify({'item' : item_list })
 
+@main.route('/addcategory', methods=['POST'])
+def add_category():
+    data = request.get_json()
+    new_category=Category( name=data['name'], id=data['id'])
+    db.session.add(new_category)
+    db.session.commit()
+
+    return jsonify({'message': 'New User successfully created'})
+
 @main.route('/category', methods=['GET'])
 def category():
     categories = Category.query.all()
@@ -84,7 +108,7 @@ def all_categories():
 
     return jsonify({'message': 'No categories have been added'})
 
-@main.route('/user/<public_id>', methods=['DELETE'])
+@main.route('/remove/<public_id>', methods=['DELETE'])
 def deleteuser(public_id):
     user = User.query.filter_by(public_id=public_id).first()
 
