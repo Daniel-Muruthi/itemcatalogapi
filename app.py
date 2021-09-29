@@ -3,14 +3,17 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+from flask_script import Manager, Server
 import os
-from flask_migrate import Migrate
+from flask_migrate import Migrate, MigrateCommand
 
 
 
 # This will initialize the app
 
 app = Flask(__name__)
+
+
 
 app.config['SECRET_KEY'] ='catalog123'
 app.config["DEBUG"] = True
@@ -20,7 +23,10 @@ app.config['SQLALCHEMY_DATABASE_URI']= 'postgresql+psycopg2://moringa:muruthi199
 
 api = Api(app)
 db = SQLAlchemy(app)
-Migrate(app,db)
+manager = Manager(app)
+manager.add_command('server', Server)
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 
 ###################################################################
@@ -41,10 +47,11 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id=db.Column(db.Integer, primary_key=True)
-    name=db.Column(db.String(255))
+    name=db.Column(db.String(255), nullable=False)
     public_id=db.Column(db.String(255), unique=True)
-    email = db.Column(db.String(255))
-    password = db.Column(db.String(255))
+    email = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+
 
 
 #db model for item categories
@@ -52,24 +59,24 @@ class User(db.Model):
 class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(255), nullable=False)
 
 
 # db Model for items
 class Item(db.Model):
     __tablename__ = 'items'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    description = db.Column(db.String(255))
-    imageurl = db.Column(db.String(255))
-    price = db.Column(db.Integer)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    imageurl = db.Column(db.String(255), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
 
 
 
 ###########Routes####################
 
 @app.route('/user', methods=['GET'])
-def user():
+def allusers():
     users = User.query.all()
 
     all_users =[]
@@ -84,14 +91,14 @@ def user():
 
         all_users.append(name_list)
 
-    return jsonify({'items': all_users})
+    return jsonify({'users': all_users})
 
-@app.route('/user', methods=['POST'])
+@app.route('/signup', methods= ['POST', 'GET'])
 def create_user():
     data = request.get_json()
 
     passcode = generate_password_hash(data['password'], method='sha256')
-    new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password = passcode, admin=False)
+    new_user = User(public_id=str(uuid.uuid4()),name=data['name'],  email=data['email'], password = passcode)
 
     db.session.add(new_user)
     db.session.commit()
@@ -139,7 +146,6 @@ def all_categories():
     if not categories:
         return jsonify({'message': 'There are no categories!'})
 
-    user.admin = True
     db.session.add(categories)
     db.session.commit()
 
@@ -152,12 +158,14 @@ def deleteuser(public_id):
     if not user:
         return jsonify({'message': 'User you are trying to delete does not exist'})
 
-    user.admin = True
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User has been successfully deleted'})
 
+def make_shell_context():
+    return dict(app = app, db = db)
+
 if __name__ == '__main__':
-    app.run()
+    manager.run()
 
 
