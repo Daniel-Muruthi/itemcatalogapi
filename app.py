@@ -89,6 +89,14 @@ class Item(db.Model):
             'price' : self.price
         }
 
-@app.route('/', methods=['GET'])
-def index():
-    pass
+
+###########Routes####################
+
+@app.route('/user', methods=['GET'])
+def item():
+    items = Item.query.all()
+
+    all_items =[]
+
+    for item in items:
+        
