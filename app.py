@@ -99,7 +99,25 @@ def item():
     all_items =[]
 
     for item in items:
-        if items:
-            id = item['id']
-            name = item['name']
-            description = item['description']
+        id = item['id']
+        name = item['name']
+
+    return jsonify({'items': all_items})
+
+@app.route('/category', methods=['GET'])
+def item():
+    categories = Category.query.all()
+
+    all_categories =[]
+
+    for category in categories:
+        id = item['id']
+        name = item['name']
+
+
+    return jsonify({'categories': all_categories})
+
+
+
+if __name__=="__main__":
+    app.run()
