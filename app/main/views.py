@@ -72,6 +72,8 @@ def add_items():
 @main.route('/item/<title>', methods=['GET'])
 def get_one_item(title):
     item = Item.query.filter_by(title=title).first()
+
+    single_item=[]
     
     if not item:
         return jsonify({'message': 'Your Item is out of stock!'})
@@ -83,11 +85,11 @@ def get_one_item(title):
     item_list['price'] = item.price
     item_list['category'] = item.category
     item_list['rating'] = item.rating
-
+    single_item.append(item_list)
     
     
     return jsonify({'item' : item_list })
-
+##########add category ##############3
 @main.route('/addcategory', methods=['POST'])
 def add_category():
     data = request.get_json()
@@ -97,32 +99,38 @@ def add_category():
 
     return jsonify({'message': 'New Category successfully created'})
 
-@main.route('/category', methods=['GET'])
-def category():
-    categories = Category.query.all()
+##############find one category##############
+@main.route('/category/<title>', methods=['GET'])
+def category(title):
+    category = Category.query.filter_by(title=title).first()
 
-    all_categories =[]
+    one_category =[]
 
-    for category in categories:
-        category_list = {}
-        category_list['id'] = category.id
-        category_list['name'] = category.name
+    
+    category_list = {}
+    category_list['id'] = category.id
+    category_list['name'] = category.name
 
-        all_categories.append(category_list)
+    all_categories.append(category_list)
 
 
-    return jsonify({'categories': all_categories})
-
-@main.route('/category/all', methods=['POST'])
+    return jsonify({'categories': one_category})
+###################show all categories############
+@main.route('/category/all', methods=['GET'])
 def all_categories():
     categories = Category.query.all()
 
-    if not categories:
-        return jsonify({'message': 'There are no categories!'})
-        
-    db.session.commit()
+    all_categories = []
+    for category in categories:
+        category_list = {}
+        category_list['id']= category.id
+        category_list['title']= category.title
+        category_list['items']= category.items
 
-    return jsonify({'message': 'No categories have been added'})
+        all_categories.append(category_list)
+
+    return jsonify({'categories': all_categories})
+
 
 @main.route('/remove/<public_id>', methods=['DELETE'])
 def deleteuser(public_id):
