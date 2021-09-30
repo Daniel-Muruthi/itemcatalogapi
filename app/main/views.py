@@ -51,7 +51,7 @@ def item():
         item_list['description'] = item.description
         item_list['image'] = item.image
         item_list['price'] = item.price
-        item_list['category'] = item.category
+        item_list['category_id'] = item.category_id
         item_list['rating'] = item.rating
 
         all_items.append(item_list)
@@ -83,7 +83,7 @@ def get_one_item(title):
     item_list['description'] = item.description
     item_list['image'] = item.image
     item_list['price'] = item.price
-    item_list['category'] = item.category
+    item_list['category_id'] = item.category_id
     item_list['rating'] = item.rating
     single_item.append(item_list)
     
@@ -109,14 +109,14 @@ def category(title):
     
     category_list = {}
     category_list['id'] = category.id
-    category_list['name'] = category.name
+    category_list['title'] = category.title
 
     all_categories.append(category_list)
 
 
     return jsonify({'categories': one_category})
 ###################show all categories############
-@main.route('/category/all', methods=['POST'])
+@main.route('/category/all', methods=['GET'])
 def all_categories():
     categories = Category.query.all()
 
