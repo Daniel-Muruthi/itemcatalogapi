@@ -22,7 +22,7 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
-    items = db.relationship('Item', backref= 'category', lazy="dynamic")
+    
 
 # db Model for items
 class Item(db.Model):
@@ -33,4 +33,4 @@ class Item(db.Model):
     image = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Integer, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    category = db.Column(db.String(255), nullable=False)
