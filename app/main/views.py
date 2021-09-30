@@ -47,27 +47,43 @@ def item():
     for item in items:
         item_list = {}
         item_list['id'] = item.id
-        item_list['product_name'] = item.product_name
+        item_list['title'] = item.title
         item_list['description'] = item.description
-        item_list['imageurl'] = item.imageurl
+        item_list['image'] = item.image
         item_list['price'] = item.price
+        item_list['category'] = item.category
+        item_list['rating'] = item.rating
 
         all_items.append(item_list)
 
     return jsonify({'items': all_items})
 
+@main.route('/additem', methods=['POST'])
+def add_items():
+    data = request.get_json()
+    categ = Category.query.filter_by(id=(data['category'])).first()
+    add_item=Item( title=data['title'], id=data['id'], description=data['description'], image=data['image'], price=data['price'], category=categ, rating=data['rating'])
+    db.session.add(add_item)
+    db.session.commit()
+
+    return jsonify({'message': 'New Category successfully created'})
+
 #get one item
-@main.route('/item/<product_name>', methods=['GET'])
-def get_one_item(product_name):
-    item = Item.query.filter_by(product_name=product_name).first()
+@main.route('/item/<title>', methods=['GET'])
+def get_one_item(title):
+    item = Item.query.filter_by(title=title).first()
     
     if not item:
         return jsonify({'message': 'Your Item is out of stock!'})
     item_list = {}
-    item_list['product_name'] = item.product_name
+    item_list['id'] = item.id
+    item_list['title'] = item.title
     item_list['description'] = item.description
-    item_list['imageurl'] = item.imageurl
+    item_list['image'] = item.image
     item_list['price'] = item.price
+    item_list['category'] = item.category
+    item_list['rating'] = item.rating
+
     
     
     return jsonify({'item' : item_list })
@@ -75,11 +91,11 @@ def get_one_item(product_name):
 @main.route('/addcategory', methods=['POST'])
 def add_category():
     data = request.get_json()
-    new_category=Category( name=data['name'], id=data['id'])
+    new_category=Category( title=data['title'], id=data['id'])
     db.session.add(new_category)
     db.session.commit()
 
-    return jsonify({'message': 'New User successfully created'})
+    return jsonify({'message': 'New Category successfully created'})
 
 @main.route('/category', methods=['GET'])
 def category():

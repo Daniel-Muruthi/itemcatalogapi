@@ -21,13 +21,16 @@ class User(UserMixin, db.Model):
 class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    items = db.relationship('Item', backref= 'category', lazy="dynamic")
 
 # db Model for items
 class Item(db.Model):
     __tablename__ = 'items'
     id = db.Column(db.Integer, primary_key=True)
-    product_name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(255), nullable=False)
-    imageurl = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    image = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
