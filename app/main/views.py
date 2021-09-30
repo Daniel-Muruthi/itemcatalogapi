@@ -116,7 +116,7 @@ def category(title):
 
     return jsonify({'categories': one_category})
 ###################show all categories############
-@main.route('/category/all', methods=['GET'])
+@main.route('/category/all', methods=['POST'])
 def all_categories():
     categories = Category.query.all()
 
