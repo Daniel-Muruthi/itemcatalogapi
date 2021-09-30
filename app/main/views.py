@@ -51,7 +51,7 @@ def item():
         item_list['description'] = item.description
         item_list['image'] = item.image
         item_list['price'] = item.price
-        item_list['category_id'] = item.category_id
+        item_list['category'] = item.category
         item_list['rating'] = item.rating
 
         all_items.append(item_list)
@@ -61,8 +61,7 @@ def item():
 @main.route('/additem', methods=['POST'])
 def add_items():
     data = request.get_json()
-    categ = Category.query.filter_by(id=(data['category'])).first()
-    add_item=Item( title=data['title'], id=data['id'], description=data['description'], image=data['image'], price=data['price'], category=categ, rating=data['rating'])
+    add_item=Item( title=data['title'], id=data['id'], description=data['description'], image=data['image'], price=data['price'], category=data['category'], rating=data['rating'])
     db.session.add(add_item)
     db.session.commit()
 
@@ -83,7 +82,7 @@ def get_one_item(title):
     item_list['description'] = item.description
     item_list['image'] = item.image
     item_list['price'] = item.price
-    item_list['category_id'] = item.category_id
+    item_list['category'] = item.category
     item_list['rating'] = item.rating
     single_item.append(item_list)
     
