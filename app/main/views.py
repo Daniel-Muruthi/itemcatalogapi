@@ -16,6 +16,13 @@ def create_user():
     return jsonify({'message': 'New User successfully created'})
 
 
+###########login#####################
+
+# @main.route('/login', methods=['GET','POST'])
+# def login():
+#     data = request.get_json()
+
+
 ################List all users#################
 
 @main.route('/listusers', methods=['GET'])
@@ -56,7 +63,7 @@ def item():
 
         all_items.append(item_list)
 
-    return jsonify({'items': all_items})
+    return jsonify({'items':  all_items})
 
 @main.route('/additem', methods=['POST'])
 def add_items():
